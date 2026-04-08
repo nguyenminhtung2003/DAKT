@@ -1,0 +1,145 @@
+You are my implementation agent for a Jetson Nano A02 project.
+
+You must read and obey these two attached files as the primary execution authority, in this exact priority order:
+
+1. `jetson_implementation_plan_optimized.md`
+2. `jetson_execution_tasks.md`
+
+Environment and execution mode:
+
+* Work against my Jetson Nano A02 through SSH.
+* Treat the Jetson as the source of truth for hardware behavior.
+* Prefer running commands on Jetson over making assumptions.
+* Do not invent hardware mappings, installed packages, or device paths. Check them first.
+* Keep all changes incremental, testable, and reversible.
+
+Mission:
+Implement V1 of the drowsiness warning system on Jetson Nano A02 according to the attached architecture and execution order.
+
+Non-negotiable constraints:
+
+* Keep MediaPipe Face Mesh as the V1 drowsiness core.
+* Do NOT replace the drowsiness core with another framework unless explicitly approved.
+* Face verification must NOT run continuously.
+* Face verification may run only:
+
+  * when RFID is scanned to start a session
+  * when periodic re-verification is triggered
+* Only one module is allowed to own the CSI camera.
+* No other module may open a separate `cv2.VideoCapture()` for the same camera.
+* Other modules must consume frames from shared buffer objects only.
+* Do NOT integrate backend-dependent logic before local camera + drowsiness + alert pipeline is stable.
+* Do NOT expand OTA beyond a safe V1 approach.
+* Log all critical runtime events:
+
+  * state transitions
+  * camera reconnect
+  * RFID scan
+  * face verify match/mismatch/low confidence
+  * alert level changes
+  * websocket reconnect
+  * OTA apply/fail
+
+Required implementation order:
+
+* Follow the task order from the execution file exactly.
+* Do not skip tasks.
+* Do not start Task N+1 until Task N has a minimum deliverable.
+* If there is an unresolved architecture decision from Task 0, stop and report it clearly before continuing.
+
+Important technical expectations extracted from the plan:
+
+* Drowsiness pipeline runs continuously in RUNNING state.
+* Use MediaPipe Face Mesh for EAR, MAR, pitch/head pose, and PERCLOS.
+* Face verification is a separate event-driven module.
+* Do not use 468-landmark cosine similarity as identity verification.
+* Camera may capture at 30 FPS, but AI processing target can be about 10–15 FPS if stable.
+* Reverification default interval is 5 minutes, with faster interval when abnormal behavior is detected.
+* Hardware health, GPS, alerts, sessions, and OTA status must be reportable.
+
+How to work:
+
+1. Start by reading both attached files fully.
+2. Summarize the architecture, hard constraints, open decisions, and execution phases.
+3. Execute TASK 0 first and explicitly close the open decisions:
+
+   * face verification local vs backend
+   * verification engine/library choice
+   * minimum Jetson↔Backend schema
+   * offline queue policy
+   * reverify fail policy
+   * OTA V1 scope
+   * actual GPIO mapping
+   * performance KPI targets
+4. If any of the above cannot be verified from the repo or Jetson, stop and ask me only for the missing fact.
+5. After TASK 0 is locked, proceed task by task.
+6. For each task:
+
+   * inspect current files first
+   * explain what will change
+   * make the smallest viable set of changes
+   * run the relevant test/check on Jetson
+   * report result in this exact format:
+
+TASK X complete:
+
+* Done:
+* Deliverables:
+* Validation run:
+* Problems:
+* Ready for next task: YES/NO
+
+Coding and ops rules:
+
+* Prefer small commits.
+* Prefer explicit file paths.
+* Do not refactor unrelated code.
+* Do not hide uncertainty.
+* If hardware behavior differs from plan, report the mismatch immediately.
+* If a command is risky, show it before executing.
+* Prefer reproducible scripts for hardware tests.
+* Add or update:
+
+  * setup/install script
+  * requirements
+  * systemd service
+  * hardware test scripts
+  * logging configuration
+    whenever relevant
+
+Practical remote workflow rules:
+
+* Use SSH commands suitable for Jetson Linux.
+* Check Python version, pip, camera availability, serial devices, audio, GPIO access, and systemd status early.
+* Prefer `tmux` or equivalent for long-running processes.
+* Capture logs using `journalctl` if a systemd service is involved.
+* Keep a clear separation between:
+
+  * standalone hardware test scripts
+  * reusable modules
+  * orchestration entrypoint
+
+Definition of success:
+The implementation is only considered acceptable when it reaches the V1 target described in the attached files, including:
+
+* auto-start service on boot
+* stable CSI camera pipeline
+* local drowsiness metrics
+* 3-level alerting
+* RFID reading
+* event-based face verification
+* session lifecycle
+* periodic re-verification
+* GPS reading
+* websocket basic send/receive
+* offline queue for important events
+* safe OTA behavior
+
+Before touching code:
+
+* First provide:
+
+  1. your understanding of the architecture,
+  2. the list of hard constraints,
+  3. the unresolved Task 0 items,
+  4. the exact first commands you want to run on the Jetson over SSH.

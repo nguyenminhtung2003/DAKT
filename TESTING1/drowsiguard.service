@@ -1,0 +1,19 @@
+[Unit]
+Description=DrowsiGuard V1 — Drowsiness Warning System
+After=network.target multi-user.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/jetson/DAKT/TESTING1
+ExecStart=/usr/bin/python3 /home/jetson/DAKT/TESTING1/main.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+Environment=DROWSIGUARD_DEVICE_ID=JETSON-001
+Environment=DROWSIGUARD_LOG_LEVEL=INFO
+
+[Install]
+WantedBy=multi-user.target

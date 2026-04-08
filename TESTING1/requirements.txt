@@ -1,0 +1,19 @@
+# DrowsiGuard V1 — Dependencies for Jetson Nano A02
+# Install: pip3 install -r requirements.txt
+
+# Core
+numpy>=1.19.0
+opencv-python>=4.5.0
+mediapipe>=0.8.0
+
+# RFID USB HID reader
+evdev>=1.4.0
+
+# GPS (deferred — install when hardware available)
+# pyserial>=3.5
+
+# WebSocket (deferred — install when backend integration begins)
+# websockets>=10.0
+
+# Utilities
+# Jetson.GPIO  # install via apt: sudo apt-get install python3-jetson-gpio
