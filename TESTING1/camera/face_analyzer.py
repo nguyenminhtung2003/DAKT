@@ -178,10 +178,10 @@ class FaceAnalyzer:
         self._perclos_window.append(eye_closed)
 
         # ── Bounding box ────────────────────────────────────
-        xs = [lm[i].x * w for i in range(468)]
-        ys = [lm[i].y * h for i in range(468)]
-        x_min, x_max = int(min(xs)), int(max(xs))
-        y_min, y_max = int(min(ys)), int(max(ys))
+        xs = [l.x for l in lm]
+        ys = [l.y for l in lm]
+        x_min, x_max = int(min(xs) * w), int(max(xs) * w)
+        y_min, y_max = int(min(ys) * h), int(max(ys) * h)
         metrics.face_bbox = (x_min, y_min, x_max - x_min, y_max - y_min)
 
         # ── Populate metrics ────────────────────────────────
